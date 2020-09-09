@@ -1,0 +1,95 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+jobs:
+  test:
+    name: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build:
+        - pinned
+        - stable
+        - stable-32
+        - stable-mips
+        - beta
+        - nightly
+        - macos
+        - win-msvc
+        - win-gnu
+        include:
+        - build: pinned
+          os: ubuntu-18.04
+          rust: 1.28.0
+        - build: stable
+          os: ubuntu-18.04
+          rust: stable
+        - build: stable-32
+          os: ubuntu-18.04
+          rust: stable
+          target: i686-unknown-linux-gnu
+        - build: stable-mips
+          os: ubuntu-18.04
+          rust: stable
+          target: mips64-unknown-linux-gnuabi64
+        - build: beta
+          os: ubuntu-18.04
+          rust: beta
+        - build: nightly
+          os: ubuntu-18.04
+          rust: nightly
+        - build: macos
+          os: macos-latest
+          rust: stable
+        - build: win-msvc
+          os: windows-2019
+          rust: stable
+        - build: win-gnu
+          os: windows-2019
+          rust: stable-x86_64-gnu
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ matrix.rust }}
+        profile: minimal
+        override: true
+
+    - name: Basic build
+      run: cargo build
+
+    - name: Build docs
+      run: cargo doc
+
+    - name: Run full test suite
+      run: cargo test
+
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+        components: rustfmt
+    - name: Install rustfmt
+      run: rustup component add rustfmt
+    - name: Check formatting
+      run: |
+        cargo fmt --all -- --check
