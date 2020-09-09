@@ -1,0 +1,24 @@
+[package]
+name = "change-case"
+version = "0.1.0"
+authors = ["sigoden <sigoden@gmail.com>"]
+edition = "2018"
+license = "MIT"
+keywords = [
+    "camelcase",
+    "pascalcase",
+    "snakecase",
+    "swapcase",
+    "titlecase",
+]
+description = """
+Transform a string between camelCase, PascalCase, Capital Case, snake_case, param-case, CONSTANT_CASE and others.
+"""
+categories  = [ "text-processing" ]
+homepage = "https://github.com/sigoden/change-case"
+repository = "https://github.com/sigoden/change-case"
+
+[dependencies]
+regex = "1"
+lazy_static = "1"
+fancy-regex = "0.3"
