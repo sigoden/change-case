@@ -1,3 +1,18 @@
+//!  Transform a string between `camelCase`, `PascalCase`, `Capital Case`, `snake_case`, `param-case`, `CONSTANT_CASE` and others.
+//! # Examples
+//!
+//! ```
+//! use change_case::*;
+//!
+//! assert_eq!(pascal_case("test string"), "TestString");
+//! assert_eq!(camel_case("Test String"), "testString");
+//! assert_eq!(captial_case("test string"), "Test String");
+//! assert_eq!(snake_case("Test String"), "test_string");
+//! assert_eq!(constant_case("test string"), "TEST_STRING");
+//! assert_eq!(constant_case("test string"), "TEST_STRING");
+//! assert_eq!(param_case("test string"), "test-string");
+//! ```
+
 use lazy_static::lazy_static;
 use regex::{Regex, Replacer};
 

@@ -1,8 +1,9 @@
 # Change Case
 
+[![Build status](https://github.com/sigoden/change-case/workflows/ci/badge.svg)](https://github.com/sigoden/change-case/actions)
 [![crates.io](https://img.shields.io/crates/v/change-case.svg)](https://crates.io/crates/change-case)
 [![Documentation](https://docs.rs/change-case/badge.svg)](https://docs.rs/change-case)
-[![Rust](https://img.shields.io/badge/rust-1.32.0%2B-blue.svg?maxAge=3600)](https://github.com/rust-lang/regex)
+[![Rust](https://img.shields.io/badge/rust-1.32.0%2B-blue.svg?maxAge=3600)](https://github.com/sigoden/change-case)
 
 Transform a string between `camelCase`, `PascalCase`, `Capital Case`, `snake_case`, `param-case`, `CONSTANT_CASE` and others.
 
