@@ -19,13 +19,18 @@ change-case = "0.1"
 ```rust
 use change_case::*;
 
-assert_eq!(pascal_case("test string"), "TestString");
 assert_eq!(camel_case("Test String"), "testString");
 assert_eq!(captial_case("test string"), "Test String");
-assert_eq!(snake_case("Test String"), "test_string");
 assert_eq!(constant_case("test string"), "TEST_STRING");
-assert_eq!(constant_case("test string"), "TEST_STRING");
+assert_eq!(dot_case("test string"), "test.string");
+assert_eq!(header_case("test string"), "Test-String");
 assert_eq!(param_case("test string"), "test-string");
+assert_eq!(pascal_case("test string"), "TestString");
+assert_eq!(path_case("test string"), "test/string");
+assert_eq!(sentence_case("Test String"), "Test string");
+assert_eq!(snake_case("Test String"), "test_string");
+assert_eq!(swap_case("Test String"), "tEST sTRING");
+assert_eq!(title_case("this vs that"), "This vs That");
 ```
 
 

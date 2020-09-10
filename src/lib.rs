@@ -4,13 +4,18 @@
 //! ```
 //! use change_case::*;
 //!
-//! assert_eq!(pascal_case("test string"), "TestString");
 //! assert_eq!(camel_case("Test String"), "testString");
 //! assert_eq!(captial_case("test string"), "Test String");
-//! assert_eq!(snake_case("Test String"), "test_string");
 //! assert_eq!(constant_case("test string"), "TEST_STRING");
-//! assert_eq!(constant_case("test string"), "TEST_STRING");
+//! assert_eq!(dot_case("test string"), "test.string");
+//! assert_eq!(header_case("test string"), "Test-String");
 //! assert_eq!(param_case("test string"), "test-string");
+//! assert_eq!(pascal_case("test string"), "TestString");
+//! assert_eq!(path_case("test string"), "test/string");
+//! assert_eq!(sentence_case("Test String"), "Test string");
+//! assert_eq!(snake_case("Test String"), "test_string");
+//! assert_eq!(swap_case("Test String"), "tEST sTRING");
+//! assert_eq!(title_case("this vs that"), "This vs That");
 //! ```
 
 use lazy_static::lazy_static;
@@ -28,37 +33,37 @@ lazy_static! {
 type Fransform = dyn Fn(&str, usize) -> String;
 
 /// Control the behavier of change case
-pub struct Config {
+pub struct Options {
     split_regex: Vec<Regex>,
     strip_regex: Vec<Regex>,
     delimiter: String,
     transform: Box<Fransform>,
 }
 
-impl Config {
+impl Options {
     /// Change regex used to split into word segments
-    pub fn set_split_regex(mut self, value: Vec<Regex>) -> Self {
+    pub fn split_regex(mut self, value: Vec<Regex>) -> Self {
         self.split_regex = value;
         self
     }
     /// Change regex used to remove extraneous characters
-    pub fn set_strip_regex(mut self, value: Vec<Regex>) -> Self {
+    pub fn strip_regex(mut self, value: Vec<Regex>) -> Self {
         self.strip_regex = value;
         self
     }
     /// Change value used between words (e.g. " ")
-    pub fn set_delimiter(mut self, value: &str) -> Self {
+    pub fn delimiter(mut self, value: &str) -> Self {
         self.delimiter = value.into();
         self
     }
-    /// Change the transform function used to transform each word segment (e.g. [transform_lower_case](fn.transform_lower_case.html))
-    pub fn set_transform(mut self, value: Box<Fransform>) -> Self {
+    /// Change the transform function used to transform each word segment
+    pub fn transform(mut self, value: Box<Fransform>) -> Self {
         self.transform = value;
         self
     }
 }
 
-impl Default for Config {
+impl Default for Options {
     fn default() -> Self {
         Self {
             split_regex: vec![RE_SPLIT_1.clone(), RE_SPLIT_2.clone()],
@@ -72,31 +77,31 @@ impl Default for Config {
 /// Core function to change case
 /// ```rust
 /// use regex::Regex;
-/// use change_case::{change_case, Config};
-/// let config = Config::default()
-///     .set_split_regex(vec![Regex::new("([a-z])([A-Z0-9])").unwrap()]);
-/// assert_eq!(change_case("camel2019", config), "camel 2019");
-/// assert_eq!(change_case("camel2019", Config::default()), "camel2019");
+/// use change_case::{change_case, Options};
+/// let options = Options::default()
+///     .split_regex(vec![Regex::new("([a-z])([A-Z0-9])").unwrap()]);
+/// assert_eq!(change_case("camel2019", options), "camel 2019");
+/// assert_eq!(change_case("camel2019", Options::default()), "camel2019");
 /// ```
 
-pub fn change_case(input: &str, config: Config) -> String {
+pub fn change_case(input: &str, options: Options) -> String {
     let result = replace(
         input,
-        config.split_regex.iter().map(|v| (v, "$1\0$2")).collect(),
+        options.split_regex.iter().map(|v| (v, "$1\0$2")).collect(),
     );
     let result = replace(
         result.as_str(),
-        config.strip_regex.iter().map(|v| (v, "\0")).collect(),
+        options.strip_regex.iter().map(|v| (v, "\0")).collect(),
     );
     let result = result.trim_start_matches("\0").trim_end_matches("\0");
-    let transform = config.transform;
+    let transform = options.transform;
 
     let parts: Vec<String> = result
         .split("\0")
         .enumerate()
         .map(|(index, part)| (transform)(part, index))
         .collect();
-    parts.join(config.delimiter.as_str())
+    parts.join(options.delimiter.as_str())
 }
 
 fn replace<R: Replacer>(input: &str, reps: Vec<(&Regex, R)>) -> String {
@@ -188,10 +193,10 @@ fn transform_pascal_case(input: &str, index: usize) -> String {
 /// assert_eq!(pascal_case("version 1.21.0"), "Version_1_21_0");
 /// ```
 pub fn pascal_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter("")
-        .set_transform(Box::new(transform_pascal_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter("")
+        .transform(Box::new(transform_pascal_case));
+    change_case(input, options)
 }
 
 fn transform_camel_case(input: &str, index: usize) -> String {
@@ -214,10 +219,10 @@ fn transform_camel_case(input: &str, index: usize) -> String {
 /// assert_eq!(camel_case("version 1.21.0"), "version_1_21_0");
 /// ```
 pub fn camel_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter("")
-        .set_transform(Box::new(transform_camel_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter("")
+        .transform(Box::new(transform_camel_case));
+    change_case(input, options)
 }
 
 fn transform_capital_case(input: &str, _index: usize) -> String {
@@ -236,10 +241,10 @@ fn transform_capital_case(input: &str, _index: usize) -> String {
 /// assert_eq!(captial_case("version 1.21.0"), "Version 1 21 0");
 /// ```
 pub fn captial_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter(" ")
-        .set_transform(Box::new(transform_capital_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter(" ")
+        .transform(Box::new(transform_capital_case));
+    change_case(input, options)
 }
 
 fn transform_upper_case(input: &str, _index: usize) -> String {
@@ -260,10 +265,10 @@ fn transform_upper_case(input: &str, _index: usize) -> String {
 /// assert_eq!(constant_case("version 1.21.0"), "VERSION_1_21_0");
 /// ```
 pub fn constant_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter("_")
-        .set_transform(Box::new(transform_upper_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter("_")
+        .transform(Box::new(transform_upper_case));
+    change_case(input, options)
 }
 
 fn transform_lower_case(input: &str, _index: usize) -> String {
@@ -284,10 +289,10 @@ fn transform_lower_case(input: &str, _index: usize) -> String {
 /// assert_eq!(dot_case("version 1.21.0"), "version.1.21.0");
 /// ```
 pub fn dot_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter(".")
-        .set_transform(Box::new(transform_lower_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter(".")
+        .transform(Box::new(transform_lower_case));
+    change_case(input, options)
 }
 
 /// Change to header case
@@ -302,10 +307,10 @@ pub fn dot_case(input: &str) -> String {
 /// assert_eq!(header_case("version 1.21.0"), "Version-1-21-0");
 /// ```
 pub fn header_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter("-")
-        .set_transform(Box::new(transform_capital_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter("-")
+        .transform(Box::new(transform_capital_case));
+    change_case(input, options)
 }
 
 /// Change to param case
@@ -320,10 +325,10 @@ pub fn header_case(input: &str) -> String {
 /// assert_eq!(param_case("version 1.21.0"), "version-1-21-0");
 /// ```
 pub fn param_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter("-")
-        .set_transform(Box::new(transform_lower_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter("-")
+        .transform(Box::new(transform_lower_case));
+    change_case(input, options)
 }
 
 /// Change to path case
@@ -338,10 +343,10 @@ pub fn param_case(input: &str) -> String {
 /// assert_eq!(path_case("version 1.21.0"), "version/1/21/0");
 /// ```
 pub fn path_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter("/")
-        .set_transform(Box::new(transform_lower_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter("/")
+        .transform(Box::new(transform_lower_case));
+    change_case(input, options)
 }
 
 fn transform_sentence_case(input: &str, index: usize) -> String {
@@ -365,10 +370,10 @@ fn transform_sentence_case(input: &str, index: usize) -> String {
 /// assert_eq!(sentence_case("version 1.21.0"), "Version 1 21 0");
 /// ```
 pub fn sentence_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter(" ")
-        .set_transform(Box::new(transform_sentence_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter(" ")
+        .transform(Box::new(transform_sentence_case));
+    change_case(input, options)
 }
 
 /// Change to snake case
@@ -384,10 +389,10 @@ pub fn sentence_case(input: &str) -> String {
 /// assert_eq!(snake_case("version 1.21.0"), "version_1_21_0");
 /// ```
 pub fn snake_case(input: &str) -> String {
-    let config = Config::default()
-        .set_delimiter("_")
-        .set_transform(Box::new(transform_lower_case));
-    change_case(input, config)
+    let options = Options::default()
+        .delimiter("_")
+        .transform(Box::new(transform_lower_case));
+    change_case(input, options)
 }
 
 /// Change to swap case
