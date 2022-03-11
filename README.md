@@ -1,4 +1,4 @@
-# Change Case
+# Change Case - Deprecated, please use [convert_case](https://crates.io/crates/convert_case)
 
 [![Build status](https://github.com/sigoden/change-case/workflows/ci/badge.svg)](https://github.com/sigoden/change-case/actions)
 [![crates.io](https://img.shields.io/crates/v/change-case.svg)](https://crates.io/crates/change-case)
